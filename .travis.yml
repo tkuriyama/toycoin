@@ -1,0 +1,16 @@
+language: python
+
+python:
+  - "3.9"
+
+# command to install dependencies
+before_install:
+  - mkdir -p /home/travis/logs/
+  - pip install -U pip
+
+install:
+  - pip install -r blockchain/requirements.txt
+  - python blockchain/setup.py install
+
+# command to run tests
+script: python -m pytest blockchain/
