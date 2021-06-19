@@ -12,7 +12,7 @@ Digest = bytes
 
 
 def hash(msg: bytes, algo = hashes.SHA512()) -> Digest:
-    """Hash given msg32."""
+    """Hash given msg."""
     digest = hashes.Hash(algo)
     digest.update(msg)
     return digest.finalize()
