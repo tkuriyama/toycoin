@@ -26,6 +26,8 @@ The script can be run conveniently with `refo all` on the command line if [redo]
 
 ## Notes
 
-See the series of write-ups on the `toycoin` project on GH Pages ([first post](https://tkuriyama.github.io/crypto/2021/06/18/toycoin-part-1.html).
+See the series of write-ups on the `toycoin` project on GH Pages: [first post](https://tkuriyama.github.io/crypto/2021/06/18/toycoin-part-1.html).
+
+
 
 
