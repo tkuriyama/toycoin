@@ -1,7 +1,7 @@
 # Merkle Hash Tree
 
-from toycoin import hash
-from typing import List, Optional, Tuple
+from toycoin import hash # type: ignore
+from typing import List, Optional, Tuple # type: ignore
 
 
 ################################################################################

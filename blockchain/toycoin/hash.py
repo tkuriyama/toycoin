@@ -1,8 +1,7 @@
+""" Hashing."""
 
-# Hashing.
 
-
-from cryptography.hazmat.primitives import hashes # typing: ignore
+from cryptography.hazmat.primitives import hashes # type: ignore
 
 
 ################################################################################
