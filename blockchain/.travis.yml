@@ -9,8 +9,8 @@ before_install:
   - pip install -U pip
 
 install:
-  - pip install -r blockchain/requirements.txt
-  - python blockchain/setup.py install
+  - pip install -r requirements.txt
+  - python setup.py install
 
 # command to run tests
-script: python -m pytest blockchain/
+script: python -m pytest .
