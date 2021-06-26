@@ -168,6 +168,7 @@ def is_leaf(tree: MerkleTree) -> bool:
     """Return True if given tree is a leaf node."""
     return tree.left is None and tree.right is None
 
+
 def get_label(tree: Optional[MerkleTree]) -> Optional[Hash]:
     """Maybe get label."""
     maybe_label : Optional[Hash]
