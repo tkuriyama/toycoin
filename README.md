@@ -7,6 +7,7 @@ Toy blockchain implementation with visualizations.
 
 ## blockchain
 
+Python blockchain implementation. See [subdirectory](https://github.com/tkuriyama/toycoin/tree/master/blockchain) for further details.
 
 ## demo
 
