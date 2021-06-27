@@ -136,7 +136,7 @@ def contains(tree: MerkleTree, leaf: Hash) -> HashPath:
         path = paths.pop()
         t, (label, _, _) = path[-1]
         if label == b'\x00' + leaf:
-            return [triple for _, triple in path]
+            return [remove_prefix(triple) for _, triple in path]
         elif not is_leaf(t):
             paths.extend(extend_path(path, t))
 
@@ -177,6 +177,13 @@ def get_label(tree: Optional[MerkleTree]) -> Optional[Hash]:
     else:
         maybe_label = None
     return maybe_label
+
+
+
+def remove_prefix(triple: HashTriple) -> HashTriple:
+    """Remove prefixes from labels."""
+    h, l, r = triple
+    return (h[1:], l[1:] if l else l, r[1:] if r else r)
 
 
 def show(tree: MerkleTree, level: int = 1, show_prefix: bool = False):
