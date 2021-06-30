@@ -13,8 +13,7 @@ class TestTransaction:
         a_priv, b_priv = signature.gen_priv_key(), signature.gen_priv_key()
         c_priv, d_priv = signature.gen_priv_key(), signature.gen_priv_key()
 
-        txn0 = {'sender': b'genesis',
-                'receiver': signature.get_pub_key_bytes(a_priv),
+        txn0 = {'receiver': signature.get_pub_key_bytes(a_priv),
                 'amount': 100.0,
                 'signature': b'genesis_signature'
                 }

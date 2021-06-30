@@ -12,12 +12,11 @@ from typing import List, Optional, TypedDict # type: ignore
 
 ################################################################################
 
-
-Address = bytes
 Hash = bytes
 
+Address = bytes
+
 class Transaction(TypedDict):
-    sender: Address
     receiver: Address
     amount: float
     signature: signature.Signature
@@ -34,8 +33,7 @@ def send(receiver: bytes,
          ) -> Transaction:
     """Generate a new transaction."""
     h = hash_txn(previous_txn)
-    return {'sender': signature.get_pub_key_bytes(sender),
-            'receiver': receiver,
+    return {'receiver': receiver,
             'amount': amount,
             'signature': signature.sign(sender, h + receiver)}
 
@@ -62,7 +60,6 @@ def valid_pair(previous: Transaction, this: Transaction) -> bool:
 
 def hash_txn(txn: Transaction) -> Hash:
     """Hash Transaction."""
-    return hash.hash(txn['sender'] +
-                     txn['receiver'] +
+    return hash.hash(txn['receiver'] +
                      bytes(str(txn['amount']).encode('utf-8')) +
                      txn['signature'])
