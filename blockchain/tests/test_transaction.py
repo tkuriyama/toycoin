@@ -37,3 +37,4 @@ class TestTransaction:
 
         # chain
         assert transaction.valid([txn0, txn1, txn2, txn3])
+        assert transaction.valid([txn0, txn1, txn3, txn2]) is False
