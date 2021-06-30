@@ -36,7 +36,9 @@ def get_pub_key_bytes(priv_key: rsa.RSAPrivateKey) -> bytes:
 
 def load_pub_key_bytes(bs: bytes) -> rsa.RSAPublicKey:
     """LOad PEM-encoded Public Key."""
-    return serialization.load_pem_public_key(bs)
+    k = serialization.load_pem_public_key(bs)
+    assert isinstance(k, rsa.RSAPublicKey)
+    return k
 
 
 b'hello world hash'################################################################################
