@@ -6,11 +6,10 @@ from cryptography.hazmat.primitives import hashes # type: ignore
 
 ################################################################################
 
+Hash = bytes
 
-Digest = bytes
 
-
-def hash(msg: bytes, algo = hashes.SHA512()) -> Digest:
+def hash(msg: bytes, algo = hashes.SHA512()) -> Hash:
     """Hash given msg."""
     digest = hashes.Hash(algo)
     digest.update(msg)

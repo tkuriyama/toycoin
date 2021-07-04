@@ -7,17 +7,13 @@ from typing import List, Optional, Tuple # type: ignore
 ################################################################################
 
 
-Hash = bytes
-
-
-
 class MerkleTree:
     """Merkle hash tree.
     Initialize with from_singleton() and from_list() functions.
     """
 
     def __init__(self,
-                 label: Hash,
+                 label: hash.Hash,
                  left: Optional['MerkleTree'] = None,
                  right: Optional['MerkleTree'] = None
                  ):
@@ -41,7 +37,7 @@ class MerkleTree:
         return size
 
 
-    def insert(self, leaf: Hash):
+    def insert(self, leaf: hash.Hash):
         """Recurse insertion."""
         # base cases
         if self.left is None:
@@ -82,7 +78,7 @@ class MerkleTree:
 # Constructors
 
 
-def from_singleton(leaf: Hash) -> MerkleTree:
+def from_singleton(leaf: hash.Hash) -> MerkleTree:
     """Create singleton Merkle tree, with root and one leaf."""
     leaf_node = MerkleTree(b'\x00' + leaf)
     root = MerkleTree(b'', leaf_node)
@@ -90,7 +86,7 @@ def from_singleton(leaf: Hash) -> MerkleTree:
     return root
 
 
-def from_list(leaves: List[Hash]) -> Optional[MerkleTree]:
+def from_list(leaves: List[hash.Hash]) -> Optional[MerkleTree]:
     """Create Merkle tree from one or more nodes."""
     if not leaves:
         return None
@@ -106,10 +102,10 @@ def from_list(leaves: List[Hash]) -> Optional[MerkleTree]:
 ################################################################################
 # Verification
 
-MaybeLeft = Optional[Hash]
-MaybeRight = Optional[Hash]
-HashTriple = Tuple[Hash, MaybeLeft, MaybeRight]
-HashPath = List[HashTriple]
+MaybeLeft = Optional[hash.Hash]
+MaybeRight = Optional[hash.Hash]
+hash.HashTriple = Tuple[hash.Hash, MaybeLeft, MaybeRight]
+hash.HashPath = List[hash.HashTriple]
 
 
 def valid(tree: MerkleTree) -> bool:
@@ -128,7 +124,7 @@ def valid(tree: MerkleTree) -> bool:
     return valid_
 
 
-def contains(tree: MerkleTree, leaf: Hash) -> HashPath:
+def contains(tree: MerkleTree, leaf: hash.Hash) -> hash.HashPath:
     """Find hash path to leaf (or empty path if none found)."""
     paths = [[(tree, get_hash_triple(tree))]]
 
@@ -143,9 +139,9 @@ def contains(tree: MerkleTree, leaf: Hash) -> HashPath:
     return []
 
 
-def extend_path(path: List[Tuple[MerkleTree, HashTriple]],
+def extend_path(path: List[Tuple[MerkleTree, hash.HashTriple]],
                 tree: MerkleTree,
-                ) -> List[List[Tuple[MerkleTree, HashTriple]]]:
+                ) -> List[List[Tuple[MerkleTree, hash.HashTriple]]]:
     """Extend path if possible."""
     paths = []
     for t in (tree.left, tree.right):
@@ -155,8 +151,8 @@ def extend_path(path: List[Tuple[MerkleTree, HashTriple]],
     return paths
 
 
-def get_hash_triple(tree: MerkleTree) -> HashTriple:
-    """Extract Hash triple for from given tree."""
+def get_hash_triple(tree: MerkleTree) -> hash.HashTriple:
+    """Extract hash.Hash triple for from given tree."""
     return (tree.label, get_label(tree.left), get_label(tree.right))
 
 
@@ -169,9 +165,9 @@ def is_leaf(tree: MerkleTree) -> bool:
     return tree.left is None and tree.right is None
 
 
-def get_label(tree: Optional[MerkleTree]) -> Optional[Hash]:
+def get_label(tree: Optional[MerkleTree]) -> Optional[hash.Hash]:
     """Maybe get label."""
-    maybe_label : Optional[Hash]
+    maybe_label : Optional[hash.Hash]
     if tree is not None:
         maybe_label = tree.label
     else:
@@ -180,7 +176,7 @@ def get_label(tree: Optional[MerkleTree]) -> Optional[Hash]:
 
 
 
-def remove_prefix(triple: HashTriple) -> HashTriple:
+def remove_prefix(triple: hash.HashTriple) -> hash.HashTriple:
     """Remove prefixes from labels."""
     h, l, r = triple
     return (h[1:], l[1:] if l else l, r[1:] if r else r)
