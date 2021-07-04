@@ -1,5 +1,5 @@
 
-from toycoin import block, hash # type: ignore
+from toycoin import block, hash, utils # type: ignore
 
 
 ################################################################################
@@ -27,6 +27,8 @@ class TestProofOfWork:
         assert b['previous_hash'] == previous
         assert b['merkle_root'] == root
         assert b['this_hash'][:2] == b'\x00\x00'
+        # processing time should be easily < 60 seconds
+        assert abs(int(b['timestamp']) - utils.timestamp()) < 60
         assert block.valid_header(b)
 
 
