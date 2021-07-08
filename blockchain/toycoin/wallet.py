@@ -1,6 +1,6 @@
 """Wallet for clients on the blockchain.
-A wallet can hold coins (in the form of transactions), as well as send
-and receive coins (again, by generating or processing transactions).
+A wallet can hold coins (in the form of transaction tokens), as well as send
+and receive coins (again, by generating or receiving tokens from transactions).
 """
 
 
