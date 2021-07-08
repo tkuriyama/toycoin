@@ -1,6 +1,8 @@
-"""Construct and verify transactions.
+"""Construct and verify transactions and tokens.
 
-
+Transactions consume and produce tokens, which are unique, immutable
+stores of value that reference transactions from which they were
+produced.
 """
 
 
@@ -26,9 +28,9 @@ class Transaction(TypedDict):
     sender_signature: signature.Signature
 
 
-class TransactionToken(TypedDict):
+class Token(TypedDict):
     txn_hash: hash.Hash
-    holder: Address
+    owner: Address
     value: int
     signature: signature.Signature
 
@@ -41,7 +43,7 @@ def send(receiver_pub: bytes,
          sender_pub: bytes,
          sender_priv: rsa.RSAPrivateKey,
          send_value: int,
-         tokens: List[TransactionToken]
+         tokens: List[Token]
          ) -> Optional[Transaction]:
     """Generate a send transaction.
     Assumes token authenticity has been verified!
@@ -74,13 +76,46 @@ def send(receiver_pub: bytes,
 # Validation
 
 
+def valid_token(txn: Transaction, token: Token) -> bool:
+    """Verify that token matches its parent transaction."""
+    if token['owner'] == txn['receiver']:
+        valid_val = token['value'] == txn['receiver_value']
+        valid_sig = token['signature'] == txn['receiver_signature']
+    else:
+        valid_val = token['value'] == txn['sender_change']
+        valid_sig = token['signature'] == txn['sender_signature']
+
+    return (token['txn_hash'] == hash_txn(txn) and
+            valid_val and
+            valid_sig)
+
+
+def valid_txn(tokens: List[Token], txn: Transaction) -> bool:
+    """Validate transaction signatures."""
+    owners = [token['owner'] for token in tokens]
+
+    if len(set(owners)) > 1:
+        return False
+
+    owner = owners[0]
+    hs = b''.join(txn['previous_hashes'])
+
+    v1 = signature.verify(txn['receiver_signature'],
+                          signature.load_pub_key_bytes(owner),
+                          hs + txn['receiver'])
+    v2 = signature.verify(txn['sender_signature'],
+                          signature.load_pub_key_bytes(owner),
+                          hs + txn['sender'])
+
+    return v1 and v2
+
 
 ################################################################################
 # Helpers
 
 
-def sum_tokens(tokens: List[TransactionToken]) -> int:
-    """Sum value of given TrasnactionTokens."""
+def sum_tokens(tokens: List[Token]) -> int:
+    """Sum value of given Tokens."""
     return sum(token['value'] for token in tokens)
 
 
