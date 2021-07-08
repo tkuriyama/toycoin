@@ -75,7 +75,20 @@ class Wallet:
         self.pending = pending
 
 
-    def receive(self, txns: List[transaction.Transaction]):
-        """Add transactions to wallet."""
-        self.wallet += txns
+    def receive(self, txn: transaction.Transaction):
+        """Add tokens to wallet."""
+        if txn is None:
+            return
+
+        txn_hash = transaction.hash_txn(txn)
+        if self.public_key == txn['receiver']:
+            self.wallet.append({'txn_hash': txn_hash,
+                                'owner': self.public_key,
+                                'value': txn['receiver_value'],
+                                'signature': txn['receiver_signature']})
+        elif self.public_key == txn['sender']:
+            self.wallet.append({'txn_hash': txn_hash,
+                                'owner': self.public_key,
+                                'value': txn['sender_change'],
+                                'signature': txn['sender_signature']})
 
