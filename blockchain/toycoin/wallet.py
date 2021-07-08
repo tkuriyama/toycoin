@@ -33,12 +33,13 @@ class Wallet:
     def send(self,
              send_value: int,
              receiver: bytes
-             ) -> Optional[transaction.Transaction]:
+             ) -> Optional[Tuple[List[transaction.Token],
+                                 transaction.Transaction]]:
         """Attempt to generate transaction that sends value.
         Tokens included in the transaction are placed in pending state.
         """
         if send_value > self.balance():
-            return []
+            return None
 
         # FIFO
         sum_value, i = 0, 0
@@ -46,16 +47,16 @@ class Wallet:
             sum_value += self.wallet[i]['value']
             i += 1
 
-        txn = transaction.send(receiver,
-                               self.public_key,
-                               self.private_key,
-                               send_value,
-                               self.wallet[:i])
+        tokens, txn = transaction.send(receiver,
+                                       self.public_key,
+                                       self.private_key,
+                                       send_value,
+                                       self.wallet[:i])
 
         self.pending.append((transaction.hash_txn(txn), self.wallet[:i]))
         self.wallet = self.wallet[i:]
 
-        return txn
+        return tokens, txn
 
 
     def confirm_send(self, txn_hash: bytes):

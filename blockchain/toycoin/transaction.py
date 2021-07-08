@@ -9,7 +9,7 @@ produced.
 from cryptography.hazmat.primitives.asymmetric import rsa # type: ignore
 from toycoin import hash # type: ignore
 from toycoin import signature, utils # type: ignore
-from typing import List, Optional, TypedDict # type: ignore
+from typing import List, Optional, Tuple, TypedDict # type: ignore
 
 
 ################################################################################
@@ -44,9 +44,8 @@ def send(receiver_pub: bytes,
          sender_priv: rsa.RSAPrivateKey,
          send_value: int,
          tokens: List[Token]
-         ) -> Optional[Transaction]:
+         ) -> Optional[Tuple[List[Token], Transaction]]:
     """Generate a send transaction.
-    Assumes token authenticity has been verified!
     Returns None if token value is insufficient, and provides change if
     token value is greater than the send value.
     """
@@ -68,7 +67,7 @@ def send(receiver_pub: bytes,
                                               b''.join(hs) + sender_pub)
            }
 
-    return txn
+    return (tokens, txn)
 
 
 
@@ -94,7 +93,7 @@ def valid_txn(tokens: List[Token], txn: Transaction) -> bool:
     """Validate transaction signatures."""
     owners = [token['owner'] for token in tokens]
 
-    if len(set(owners)) > 1:
+    if not owners or len(set(owners)) > 1:
         return False
 
     owner = owners[0]
