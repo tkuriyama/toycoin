@@ -4,7 +4,18 @@ from toycoin import block, hash, utils # type: ignore
 
 ################################################################################
 
+class TestGenBlock:
+
+
+    def test_empty_block(self):
+        """Test gen_block with no transactions."""
+        f = block.gen_block
+
+        assert f(hash.hash(b'previous'), [], 1) == (None, [])
+
+
 class TestProofOfWork:
+
 
     def test_next_difficulty(self):
         """Test next_difficulty"""
