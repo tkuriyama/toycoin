@@ -1,7 +1,9 @@
 """Construct blocks.
 A block consists of a collection of transactions (of some limited number),
-plus additional metadata in a header. Blocks are generated with proof-of-work.
+plus additional metadata in a header. Blocks are generated with a proof-of-work
+hash.
 """
+
 
 import math # type: ignore
 from toycoin import hash, merkle, transaction, utils # type: ignore
@@ -81,7 +83,7 @@ def proof_of_work(p: hash.Hash,
     h = b''
     while not solved(h, difficulty):
         nonce += 1
-        h = hash.hash(now + utils.int_to_bytes(nonce) + p + root)
+        h = hash.hash(now + p + utils.int_to_bytes(nonce) + root)
 
     return {'timestamp': now,
             'previous_hash': p,
@@ -99,11 +101,18 @@ def solved(h: hash.Hash, n: int) -> bool:
 # Validation
 
 
+def valid_block(block: Block) -> bool:
+    """Check if block transactions and header hashes are valid."""
+    tree = gen_merkle(block['txns'])
+    return (valid_header(block['header']) and
+            tree.label == block['header']['merkle_root'])
+
+
 def valid_header(header: BlockHeader) -> bool:
-    """Check if header is valid."""
+    """Check if block hash matches header data."""
     h = hash.hash(header['timestamp'] +
-                header['nonce'] +
-                header['previous_hash'] +
-                header['merkle_root'])
+                  header['previous_hash'] +
+                  header['nonce'] +
+                  header['merkle_root'])
 
     return header['this_hash'] == h
