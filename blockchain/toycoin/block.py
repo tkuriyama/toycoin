@@ -61,7 +61,7 @@ def gen_block(previous_hash: hash.Hash,
 
 def gen_merkle(txns: Transactions) -> merkle.MerkleTree:
     """Generate Merkle Tree given (non-empty) transactions."""
-    tree = merkle.from_list(txns)
+    tree = merkle.from_list([transaction.hash_txn(txn) for txn in txns])
     assert tree is not None
     return tree
 
@@ -107,24 +107,29 @@ def solved(h: hash.Hash, n: int) -> bool:
 def valid_blockchain(chain: BlockChain) -> bool:
     """Check validity of blockchain."""
     pairs = zip(chain[1:], chain)
-    return (all(valid_block(block) for block in chain) and
-            all(valid_hash_pair(b1, b0) for b1, b0 in pairs))
+    v1 = all(valid_hash_pair(b1, b0) for b1, b0 in pairs)
+
+    v2 = all(valid_block(block, next_difficulty(i))
+             for i, block in enumerate(chain))
+
+    return v1 and v2
 
 
-def valid_block(block: Block) -> bool:
+def valid_block(block: Block, difficulty: int) -> bool:
     """Check if block transactions and header hashes are valid."""
     tree = gen_merkle(block['txns'])
-    return (valid_header(block['header']) and
+    return (valid_header(block['header'], difficulty) and
             tree.label == block['header']['merkle_root'])
 
 
-def valid_header(header: BlockHeader) -> bool:
+def valid_header(header: BlockHeader, difficulty: int) -> bool:
     """Check if block hash matches header data."""
     h = hash.hash(header['timestamp'] +
                   header['previous_hash'] +
                   header['nonce'] +
                   header['merkle_root'])
-    return header['this_hash'] == h
+    return (header['this_hash'] == h and
+            solved(header['this_hash'], difficulty))
 
 
 def valid_hash_pair(b1: Block, b0: Block) -> bool:
