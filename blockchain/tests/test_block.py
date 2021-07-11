@@ -136,12 +136,10 @@ class TestProofOfWork:
         assert f(b'\x00\x00\x01\x02', 3) is False
 
 
-
-
 ################################################################################
 # Helpers
 
-        
+
 def gen_wallet() -> wallet.Wallet:
     """Generate wallet."""
     priv_key = signature.gen_priv_key()
