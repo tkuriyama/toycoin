@@ -36,6 +36,7 @@ BlockChain = List[Block]
 # Constructor
 
 
+GENESIS = hash.hash(b'genesis') # genesis block previous hash
 BLOCK_TXNS = 10 # magic number: max transactions per block
 
 
@@ -112,7 +113,9 @@ def valid_blockchain(chain: BlockChain) -> bool:
     v2 = all(valid_block(block, next_difficulty(i))
              for i, block in enumerate(chain))
 
-    return v1 and v2
+    v3 = chain[0]['header']['previous_hash'] == GENESIS
+
+    return v1 and v2 and v3
 
 
 def valid_block(block: Block, difficulty: int) -> bool:
