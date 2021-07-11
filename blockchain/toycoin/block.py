@@ -29,6 +29,9 @@ class Block(TypedDict):
     txns: Transactions
 
 
+BlockChain = List[Block]
+
+
 ################################################################################
 # Constructor
 
@@ -101,6 +104,13 @@ def solved(h: hash.Hash, n: int) -> bool:
 # Validation
 
 
+def valid_blockchain(chain: BlockChain) -> bool:
+    """Check validity of blockchain."""
+    pairs = zip(chain[1:], chain)
+    return (all(valid_block(block) for block in chain) and
+            all(valid_hash_pair(b1, b0) for b1, b0 in pairs))
+
+
 def valid_block(block: Block) -> bool:
     """Check if block transactions and header hashes are valid."""
     tree = gen_merkle(block['txns'])
@@ -114,5 +124,9 @@ def valid_header(header: BlockHeader) -> bool:
                   header['previous_hash'] +
                   header['nonce'] +
                   header['merkle_root'])
-
     return header['this_hash'] == h
+
+
+def valid_hash_pair(b1: Block, b0: Block) -> bool:
+    """B1 previous hash matches B0 hash."""
+    return b1['header']['previous_hash'] == b0['header']['this_hash']
