@@ -1,10 +1,8 @@
-"""Network msg protocol.
-Each msg is 4 bytes denoting the size of the payload, in bytes,
-followed by the payload bytes.
+"""Simple message protocol.
 """
 
 
-from asyncio import StreamReader, StreamWriter
+from asyncio import StreamReader, StreamWriter # type: ignore
 
 
 ################################################################################
@@ -15,7 +13,6 @@ async def read_msg(stream: StreamReader) -> bytes:
     size = int.from_bytes(size_bytes, byteorder='big')
     data = await stream.readexactly(size)
     return data
-
 
 async def send_msg(stream: StreamWriter, data: bytes):
     size_bytes = len(data).to_bytes(4, byteorder='big')

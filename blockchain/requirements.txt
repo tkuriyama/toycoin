@@ -1,9 +1,5 @@
 mypy >= 0.800
-numpy
-pandas
 pyflakes
 pytest
 pytest-cov
-requests
-flask
 cryptography
