@@ -69,10 +69,11 @@ class TestSerialize:
 
     def test_pack_unoack_txn_pairs(self):
           """Test round trip pack and unpack for tokens, txn pairs."""
-          f = serialize.pack_txn_pairs
-          g = serialize.unpack_txn_pairs
+          f = serialize.pack_txn_pair
+          g = serialize.unpack_txn_pair
 
-          pairs = [([token1], txn0a),
-                   ([token2, token3], txn0b)
-                   ]
-          assert g(f(pairs)) == pairs
+          pair1 = ([token1], txn0a)
+          pair2 = ([token2, token3], txn0b)
+
+          assert g(f(pair1)) == pair1
+          assert g(f(pair2)) == pair2

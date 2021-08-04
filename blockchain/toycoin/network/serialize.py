@@ -65,19 +65,18 @@ def unpack_txn(s: str) -> transaction.Transaction:
 ################################################################################
 # Token & Transaction Pairs
 
-Pair = Tuple[List[transaction.Token], transaction.Transaction]
+TxnPair = Tuple[List[transaction.Token], transaction.Transaction]
 
-def pack_txn_pairs(pairs: List[Pair]) -> str:
-    """Pack (tokens, transaction) pairs."""
-    pairs = [([pack_token(token) for token in tokens], pack_txn(txn))
-             for tokens, txn in pairs]
-    return json.dumps(pairs)
+def pack_txn_pair(pair: TxnPair) -> str:
+    """Pack (tokens, transaction) pair."""
+    tokens, txn = pair
+    pair = ([pack_token(token) for token in tokens], pack_txn(txn))
+    return json.dumps(pair)
 
-def unpack_txn_pairs(s: str) -> List[Pair]:
-    """Unpack (tokens, transacion) pairs."""
-    pairs = json.loads(s)
-    return [([unpack_token(token) for token in tokens], unpack_txn(txn))
-            for tokens, txn in pairs]
+def unpack_txn_pair(s: str) -> TxnPair:
+    """Unpack (tokens, transacion) pair."""
+    tokens, txn = json.loads(s)
+    return ([unpack_token(token) for token in tokens], unpack_txn(txn))
 
 
 
