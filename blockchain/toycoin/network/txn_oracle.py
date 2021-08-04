@@ -22,10 +22,6 @@ import uuid # type: ignore
 
 OracleState = List[wallet.Wallet]
 
-Txns = List[transaction.Transaction]
-Tokens = List[transaction.Token]
-Payload = List[Tuple[Tokens, transaction.Transaction]]
-
 
 ################################################################################
 # Main Loop
