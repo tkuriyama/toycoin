@@ -25,11 +25,23 @@ txn0b = {'previous_hashes': [b'2'],
          'sender_signature': b'sender2_signature'
          }
 
-token = {'txn_hash': b'random hash',
+token1 = {'txn_hash': b'random hash',
          'owner': b'some owner',
          'value': 100,
          'signature': b'some signature'
-         }
+          }
+
+token2 = {'txn_hash': b'random hash2',
+         'owner': b'some owner2',
+         'value': 50,
+         'signature': b'some signature2'
+          }
+
+token3 = {'txn_hash': b'random hash3',
+         'owner': b'some owner3',
+         'value': 50,
+         'signature': b'some signature3'
+    }
 
 
 ################################################################################
@@ -41,7 +53,8 @@ class TestSerialize:
         f = serialize.pack_token
         g = serialize.unpack_token
 
-        assert g(f(token)) == token
+        assert g(f(token1)) == token1
+        assert g(f(token1)) != token2
 
 
     def test_pack_unpack_txn(self):
@@ -53,3 +66,13 @@ class TestSerialize:
         assert g(f(txn0a)) == txn0a
         assert g(f(txn0b)) == txn0b
         assert g(f(txn0a)) != txn0b
+
+    def test_pack_unoack_txn_pairs(self):
+          """Test round trip pack and unpack for tokens, txn pairs."""
+          f = serialize.pack_txn_pairs
+          g = serialize.unpack_txn_pairs
+
+          pairs = [([token1], txn0a),
+                   ([token2, token3], txn0b)
+                   ]
+          assert g(f(pairs)) == pairs

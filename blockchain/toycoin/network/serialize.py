@@ -5,6 +5,7 @@ Mainly converting bytes to and from b64, and using JSON functions.
 import base64 # type: ignore
 import json # type: ignore
 from toycoin import transaction # type: ignore
+from typing import List, Tuple # type: ignore
 
 
 ################################################################################
@@ -59,6 +60,26 @@ def unpack_txn(s: str) -> transaction.Transaction:
             'sender_change': txn['sender_change'],
             'sender_signature': s2b(txn['sender_signature'])
             }
+
+
+################################################################################
+# Token & Transaction Pairs
+
+Pair = Tuple[List[transaction.Token], transaction.Transaction]
+
+def pack_txn_pairs(pairs: List[Pair]) -> str:
+    """Pack (tokens, transaction) pairs."""
+    pairs = [([pack_token(token) for token in tokens], pack_txn(txn))
+             for tokens, txn in pairs]
+    return json.dumps(pairs)
+
+def unpack_txn_pairs(s: str) -> List[Pair]:
+    """Unpack (tokens, transacion) pairs."""
+    pairs = json.loads(s)
+    return [([unpack_token(token) for token in tokens], unpack_txn(txn))
+            for tokens, txn in pairs]
+
+
 
 ################################################################################
 # Helpers
