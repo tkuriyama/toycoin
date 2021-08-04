@@ -5,9 +5,7 @@ stores of value that reference transactions from which they were
 produced.
 """
 
-import base64 # type: ignore
 from cryptography.hazmat.primitives.asymmetric import rsa # type: ignore
-import json # type: ignore
 from toycoin import hash # type: ignore
 from toycoin import signature, utils # type: ignore
 from typing import List, Optional, Tuple, TypedDict # type: ignore
@@ -128,35 +126,4 @@ def hash_txn(txn: Transaction) -> hash.Hash:
                      txn['sender'] +
                      utils.int_to_bytes(txn['sender_change']) +
                      txn['sender_signature'])
-
-
-def pack(txn:Transaction) -> str:
-    """Pack txn to JSON string with b64 for bytes."""
-    f = lambda x: base64.b64encode(x).decode('utf-8')
-    txn_ = {'previous_hashes': [f(h) for h in
-                                txn['previous_hashes']],
-            'receiver': f(txn['receiver']),
-            'receiver_value': txn['receiver_value'],
-            'receiver_signature': f(txn['receiver_signature']),
-            'sender': f(txn['sender']),
-            'sender_change': txn['sender_change'],
-            'sender_signature': f(txn['sender_signature'])
-            }
-    return json.dumps(txn_)
-
-
-def unpack(s: str) -> Transaction:
-    """Unpack txn from JSON string with b64 for bytes."""
-    f = base64.b64decode
-    txn = json.loads(s)
-    return {'previous_hashes': [f(h) for h in
-                                txn['previous_hashes']],
-            'receiver': f(txn['receiver']),
-            'receiver_value': txn['receiver_value'],
-            'receiver_signature': f(txn['receiver_signature']),
-            'sender': f(txn['sender']),
-            'sender_change': txn['sender_change'],
-            'sender_signature': f(txn['sender_signature'])
-            }
-
 
