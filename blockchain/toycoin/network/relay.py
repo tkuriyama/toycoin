@@ -1,9 +1,13 @@
-import asyncio
-from asyncio import StreamReader, StreamWriter, Queue
-from collections import deque, defaultdict
-from contextlib import suppress
-from typing import Deque, DefaultDict, Dict
-from msg_protocol import read_msg, send_msg
+"""A TCP message relay.
+Messages are relayed to all connected clients based on channel names.
+"""
+
+import asyncio # type: ignore
+from asyncio import StreamReader, StreamWriter, Queue # type: ignore
+from collections import deque, defaultdict # type: ignore
+from contextlib import suppress # type: ignore
+from typing import Deque, DefaultDict, Dict # type: ignore
+from msg_protocol import read_msg, send_msg # type: ignore
 
 
 ################################################################################
