@@ -11,12 +11,13 @@ from typing import List, Tuple # type: ignore
 ################################################################################
 # Token
 
-def pack_token(token: transaction.Token) -> str:
+def pack_token(token: transaction.Token, abbrev: bool = False) -> str:
     """Pack token to JSON string with b64 for bytes."""
-    token_ = {'txn_hash': b2s(token['txn_hash']),
-              'owner': b2s(token['owner']),
+    f = b2s if not abbrev else lambda x: b2s(x)[:19] + '...'
+    token_ = {'txn_hash': f(token['txn_hash']),
+              'owner': f(token['owner']),
               'value': token['value'],
-              'signature': b2s(token['signature'])
+              'signature': f(token['signature'])
               }
     return json.dumps(token_)
 
@@ -34,16 +35,17 @@ def unpack_token(s: str) -> transaction.Token:
 ################################################################################
 # Transaction
 
-def pack_txn(txn: transaction.Transaction) -> str:
+def pack_txn(txn: transaction.Transaction, abbrev: bool = False) -> str:
     """Pack txn to JSON string with b64 for bytes."""
-    txn_ = {'previous_hashes': [b2s(h) for h in
+    f = b2s if not abbrev else lambda x: b2s(x)[:19] + '...'
+    txn_ = {'previous_hashes': [f(h) for h in
                                 txn['previous_hashes']],
-            'receiver': b2s(txn['receiver']),
+            'receiver': f(txn['receiver']),
             'receiver_value': txn['receiver_value'],
-            'receiver_signature': b2s(txn['receiver_signature']),
-            'sender': b2s(txn['sender']),
+            'receiver_signature': f(txn['receiver_signature']),
+            'sender': f(txn['sender']),
             'sender_change': txn['sender_change'],
-            'sender_signature': b2s(txn['sender_signature'])
+            'sender_signature': f(txn['sender_signature'])
             }
     return json.dumps(txn_)
 

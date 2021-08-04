@@ -37,13 +37,15 @@ class Token(TypedDict):
 ################################################################################
 # Send
 
+TxnPair = Tuple[List[Token], Transaction]
+
 
 def send(receiver_pub: bytes,
          sender_pub: bytes,
          sender_priv: rsa.RSAPrivateKey,
          send_value: int,
          tokens: List[Token]
-         ) -> Optional[Tuple[List[Token], Transaction]]:
+         ) -> Optional[TxnPair]:
     """Generate a send transaction.
     Returns None if token value is insufficient, and provides change if
     token value is greater than the send value.

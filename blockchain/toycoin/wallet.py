@@ -33,8 +33,7 @@ class Wallet:
     def send(self,
              send_value: int,
              receiver: bytes
-             ) -> Optional[Tuple[List[transaction.Token],
-                                 transaction.Transaction]]:
+             ) -> Optional[transaction.TxnPair]:
         """Attempt to generate transaction that sends value.
         Tokens included in the transaction are placed in pending state.
         """
