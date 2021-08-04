@@ -2,4 +2,5 @@ mypy >= 0.800
 pyflakes
 pytest
 pytest-cov
+pytz
 cryptography
