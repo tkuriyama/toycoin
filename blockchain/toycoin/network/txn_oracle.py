@@ -47,7 +47,6 @@ async def main(args):
             try:
                 for txn_pair in txn_pairs:
                     data = b'TXN ' + serialize.pack_txn_pair(txn_pair).encode()
-                    print(f'Sending {data[:19]}')
                     await send_msg(writer, chan)
                     await send_msg(writer, data)
                 txn_pairs, state = update_state(state)
