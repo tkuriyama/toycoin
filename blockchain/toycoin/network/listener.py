@@ -1,11 +1,11 @@
 """Listener node.
+Used in toycoin for monitoring network activity, indepepdently on nodes.
 """
 
 
 import asyncio # type: ignore
 import argparse, uuid # type: ignore
-from toycoin import transaction # type: ignore
-from toycoin.network import serialize # type: ignore
+from toycoin.network import serialize, show # type: ignore
 from toycoin.network.msg_protocol import read_msg, send_msg # type: ignore
 
 
@@ -17,14 +17,13 @@ async def main(args):
     print(f'Starting up {me}')
     reader, writer = await asyncio.open_connection(args.host, args.port)
     print(f'I am {writer.get_extra_info("sockname")}')
-    channel = args.listen.encode()
-    await send_msg(writer, channel)
+    print(f'Listening on channel {args.listen}')
+    await send_msg(writer, args.listen.encode())
 
     try:
         while data := await read_msg(reader):
-            txn_pair = serialize.unpack_txn_pair(data)
-            print(f'Received by {me}: {show_txn_pair(txn_pair)}')
-            print('Connection ended.')
+            handle_data(data)
+            print('Transmission ended.')
     except asyncio.IncompleteReadError:
         print('Server closed.')
 
@@ -34,18 +33,15 @@ async def main(args):
 
 
 ################################################################################
-# Printers
+# Data Handler
 
-
-def show_txn_pair(txn_pair: transaction.TxnPair) -> str:
-    """Return stringoof transaction pair."""
-    tokens, txn = txn_pair
-    
-    tokens = '\n'.join(serialize.pack_token(token, True) for token in tokens)
-    s1 = f'Tokens\n{tokens}'
-    s2 = f'Transaction\n{serialize.pack_txn(txn, True)}'
-
-    return f'\n{"-" * 80}\n{s1}\n{s2}'
+def handle_data(data: bytes):
+    """Data handler."""
+    if data[:4] == b'TXN ':
+        txn_pair = serialize.unpack_txn_pair(data[4:])
+        print(f'Received: {show.show_txn_pair(txn_pair)}')
+    else:
+        print(f'Couldn not handle message type {data[:4]}')
 
 
 ################################################################################
@@ -55,7 +51,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='localhost')
     parser.add_argument('--port', default=25000)
-    parser.add_argument('--listen', default='/topic/txn')
+    parser.add_argument('--listen', default='/topic/main')
 
     try:
         asyncio.run(main(parser.parse_args()))

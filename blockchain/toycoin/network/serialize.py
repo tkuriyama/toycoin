@@ -11,15 +11,18 @@ from typing import List, Tuple # type: ignore
 ################################################################################
 # Token
 
-def pack_token(token: transaction.Token, abbrev: bool = False) -> str:
+def pack_token(token: transaction.Token,
+               abbrev: bool = False,
+               pretty: bool = False
+               ) -> str:
     """Pack token to JSON string with b64 for bytes."""
-    f = b2s if not abbrev else lambda x: b2s(x)[:19] + '...'
+    f = get_b2s(abbrev)
     token_ = {'txn_hash': f(token['txn_hash']),
               'owner': f(token['owner']),
               'value': token['value'],
               'signature': f(token['signature'])
               }
-    return json.dumps(token_)
+    return json_dumps(token_, pretty)
 
 
 def unpack_token(s: str) -> transaction.Token:
@@ -35,9 +38,12 @@ def unpack_token(s: str) -> transaction.Token:
 ################################################################################
 # Transaction
 
-def pack_txn(txn: transaction.Transaction, abbrev: bool = False) -> str:
+def pack_txn(txn: transaction.Transaction,
+             abbrev: bool = False,
+             pretty: bool  = False
+             ) -> str:
     """Pack txn to JSON string with b64 for bytes."""
-    f = b2s if not abbrev else lambda x: b2s(x)[:19] + '...'
+    f = get_b2s(abbrev)
     txn_ = {'previous_hashes': [f(h) for h in
                                 txn['previous_hashes']],
             'receiver': f(txn['receiver']),
@@ -47,7 +53,7 @@ def pack_txn(txn: transaction.Transaction, abbrev: bool = False) -> str:
             'sender_change': txn['sender_change'],
             'sender_signature': f(txn['sender_signature'])
             }
-    return json.dumps(txn_)
+    return json_dumps(txn_, pretty)
 
 
 def unpack_txn(s: str) -> transaction.Transaction:
@@ -94,3 +100,14 @@ def b2s(bs: bytes) -> str:
 def s2b(s: str) -> bytes:
     """b64 string to bytes."""
     return base64.b64decode(s)
+
+
+def get_b2s(abbrev: bool):
+    """Bytes to string function, optioanlly abbreviating output."""
+    return b2s if not abbrev else lambda x: b2s(x)[:10] + '...'
+
+
+def json_dumps(d: dict, pretty: bool) -> str:
+    """Generate JSON, optionally with pretty printing."""
+    return (json.dumps(d) if not pretty else
+            json.dumps(d, indent=4, sort_keys=True))

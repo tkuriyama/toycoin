@@ -28,6 +28,7 @@ OracleState = List[wallet.Wallet]
 
 
 async def main(args):
+    """Transaction oracle main loop."""
     me = uuid.uuid4().hex[:8]
     print(f'Starting up {me}: Transaction Oracle')
     reader, writer = await asyncio.open_connection(
@@ -45,7 +46,7 @@ async def main(args):
                                                args.max_interval))
             try:
                 for txn_pair in txn_pairs:
-                    data = serialize.pack_txn_pair(txn_pair).encode()
+                    data = b'TXN ' + serialize.pack_txn_pair(txn_pair).encode()
                     print(f'Sending {data[:19]}')
                     await send_msg(writer, chan)
                     await send_msg(writer, data)
@@ -97,7 +98,7 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
 
 def update_state(state: OracleState
                  ) -> Tuple[List[transaction.TxnPair], OracleState]:
-    """Update wallets with random (valid) transactions.."""
+    """Generate a random transaction and update state of wallets."""
     print('\nGenerating new transaction...')
     print_state(state)
 
@@ -153,7 +154,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='localhost')
     parser.add_argument('--port', default=25000, type=int)
-    parser.add_argument('--channel', default='/topic/txn')
+    parser.add_argument('--channel', default='/topic/main')
     parser.add_argument('--min_interval', default=3, type=float)
     parser.add_argument('--max_interval', default=10, type=float)
     parser.add_argument('--size', default=0, type=int)
