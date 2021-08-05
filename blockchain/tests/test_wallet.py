@@ -123,6 +123,37 @@ class TestWallet:
         assert c_wallet.balance() == 0
         assert d_wallet.balance() == 120
 
+    def test_no_zero_change(self):
+        """Test transactions don't generate 0 change tokens.."""
+        a_wallet, b_wallet = gen_wallet(), gen_wallet()
+
+        txn0a = {'previous_hashes': [],
+                 'receiver': a_wallet.public_key,
+                 'receiver_value': 100,
+                 'receiver_signature': b'',
+                 'sender': b'genesis',
+                 'sender_change': 0,
+                 'sender_signature': b''
+                 }
+        txn0b = {'previous_hashes': [],
+                 'receiver': a_wallet.public_key,
+                 'receiver_value': 50,
+                 'receiver_signature': b'',
+                 'sender': b'genesis',
+                 'sender_change': 0,
+                 'sender_signature': b''
+                 }
+
+        a_wallet.receive(txn0a)
+        a_wallet.receive(txn0b)
+        assert len(a_wallet.wallet) == 2
+
+        _, txn1 = a_wallet.send(100, b_wallet.public_key)
+        a_wallet.confirm_send(transaction.hash_txn(txn1))
+        a_wallet.receive(txn1)
+        b_wallet.receive(txn1)
+
+        assert len(a_wallet.wallet) == 1
 
 ################################################################################
 # Helpers
