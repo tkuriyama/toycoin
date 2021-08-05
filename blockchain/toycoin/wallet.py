@@ -87,8 +87,8 @@ class Wallet:
                                 'value': txn['receiver_value'],
                                 'signature': txn['receiver_signature']})
         elif self.public_key == txn['sender']:
-            self.wallet.append({'txn_hash': txn_hash,
-                                'owner': self.public_key,
-                                'value': txn['sender_change'],
-                                'signature': txn['sender_signature']})
-
+            if txn['sender_change'] > 0:
+                self.wallet.append({'txn_hash': txn_hash,
+                                    'owner': self.public_key,
+                                    'value': txn['sender_change'],
+                                    'signature': txn['sender_signature']})
