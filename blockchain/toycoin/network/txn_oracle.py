@@ -88,10 +88,30 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
              'sender_signature': b''
              }
 
+    txn0c = {'previous_hashes': [],
+             'receiver': c_wallet.public_key,
+             'receiver_value': 25,
+             'receiver_signature': b'',
+             'sender': b'genesis',
+             'sender_change': 0,
+             'sender_signature': b''
+             }
+
+    txn0d = {'previous_hashes': [],
+             'receiver': d_wallet.public_key,
+             'receiver_value': 10,
+             'receiver_signature': b'',
+             'sender': b'genesis',
+             'sender_change': 0,
+             'sender_signature': b''
+             }
+
     a_wallet.receive(txn0a)
     b_wallet.receive(txn0b)
+    c_wallet.receive(txn0c)
+    d_wallet.receive(txn0d)
 
-    return ([([], txn0a), ([], txn0b)],
+    return ([([], txn0a), ([], txn0b), ([], txn0c), ([], txn0d)],
             [a_wallet, b_wallet, c_wallet, d_wallet])
 
 
