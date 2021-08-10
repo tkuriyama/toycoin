@@ -4,7 +4,7 @@ Mainly converting bytes to and from b64, and using JSON functions.
 
 import base64 # type: ignore
 import json # type: ignore
-from toycoin import transaction # type: ignore
+from toycoin import block, transaction # type: ignore
 from typing import List, Tuple # type: ignore
 
 
@@ -87,6 +87,56 @@ def unpack_txn_pair(s: str) -> TxnPair:
     return ([unpack_token(token) for token in tokens], unpack_txn(txn))
 
 
+################################################################################
+# Blocks
+
+
+def pack_blockchain(blocks: block.BlockChain,
+                    abbrev: bool = False,
+                    pretty: bool = False) -> str:
+    """Pack blockchain to JSON string with b64 for bytes."""
+    blocks_ = [_pack_block(block, abbrev, pretty) for
+               block in blocks]
+    return json_dumps(blocks_, pretty)
+
+
+def _pack_block(block: block.Block,
+               abbrev: bool = False,
+               pretty: bool = False,
+               skip_pack: bool = True
+               ) -> str:
+    """Pack blockchain to JSON string with b64 for bytes."""
+    f = get_b2s(abbrev)
+    hdr, txns = block['header'], block['txns']
+    hdr_ = {'timestamp': f(hdr['timestamp']),
+            'previous_hash': f(hdr['previous_hash']),
+            'nonce': f(hdr['nonce']),
+            'merkle_root': f(hdr['merkle_root']),
+            'this_hash': f(hdr['this_hash'])
+            }
+    txns_ = [pack_txn(txn) for txn in txns]
+    return json.dumps({'header': hdr_, 'txns': txns_})
+
+
+def unpack_blockchain(s: str) -> block.BlockChain:
+    """Unapck blockchain from JSON string with b64 for bytes."""
+    blocks = json.loads(s)
+    return [_unpack_block(block) for block in blocks]
+
+
+def _unpack_block(s: str) -> block.Block:
+    """Unpack block from JSON string with b64 for bytes."""
+    block = json.loads(s)
+    hdr, txns = block['header'], block['txns']
+    return {'header': {'timestamp': s2b(hdr['timestamp']),
+                       'previous_hash': s2b(hdr['previous_hash']),
+                       'nonce': s2b(hdr['nonce']),
+                       'merkle_root': s2b(hdr['merkle_root']),
+                       'this_hash': s2b(hdr['this_hash'])
+                       },
+            'txns': [unpack_txn(txn) for txn in txns]
+            }
+
 
 ################################################################################
 # Helpers
@@ -107,7 +157,7 @@ def get_b2s(abbrev: bool):
     return b2s if not abbrev else lambda x: b2s(x)[:10] + '...'
 
 
-def json_dumps(d: dict, pretty: bool) -> str:
+def json_dumps(obj, pretty: bool) -> str:
     """Generate JSON, optionally with pretty printing."""
-    return (json.dumps(d) if not pretty else
-            json.dumps(d, indent=4, sort_keys=True))
+    return (json.dumps(obj) if not pretty else
+            json.dumps(obj, indent=4, sort_keys=True))

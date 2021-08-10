@@ -1,7 +1,10 @@
 """Test de/serialization.
 """
 
+
+from toycoin import block # type: ignore
 from toycoin.network import serialize # type: ignore
+
 
 ################################################################################
 
@@ -77,3 +80,16 @@ class TestSerialize:
 
           assert g(f(pair1)) == pair1
           assert g(f(pair2)) == pair2
+
+
+    def test_pack_unpack_blockchain(self):
+        """Test round trip pack and unpack for blocks."""
+
+        block0, [] = block.gen_block(block.GENESIS,
+                                    [txn0a, txn0b],
+                                    1)
+        blockchain = [block0]
+
+        f = serialize.pack_blockchain
+        g = serialize.unpack_blockchain
+        assert g(f(blockchain)) == blockchain
