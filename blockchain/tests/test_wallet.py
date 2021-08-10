@@ -19,7 +19,7 @@ class TestWallet:
                  'receiver': a_wallet.public_key,
                  'receiver_value': 100,
                  'receiver_signature': b'',
-                 'sender': b'genesis',
+                 'sender': b'COINBASE',
                  'sender_change': 0,
                  'sender_signature': b''
                  }
@@ -27,14 +27,14 @@ class TestWallet:
                  'receiver': a_wallet.public_key,
                  'receiver_value': 50,
                  'receiver_signature': b'',
-                 'sender': b'genesis',
+                 'sender': b'COINBASE',
                  'sender_change': 0,
                  'sender_signature': b''
                  }
 
         # genesis receive (the genesis txn is not valid)
-        assert transaction.valid_txn([], txn0a) is False
-        assert transaction.valid_txn([], txn0b) is False
+        assert transaction.valid_txn([], txn0a) is True
+        assert transaction.valid_txn([], txn0b) is True
 
         assert a_wallet.balance() == 0
         a_wallet.receive(txn0a)

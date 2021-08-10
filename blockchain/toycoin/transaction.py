@@ -76,6 +76,9 @@ def send(receiver_pub: bytes,
 # Validation
 
 
+COINBASE = b'COINBASE'
+
+
 def valid_token(txn: Transaction, token: Token) -> bool:
     """Verify that token matches its parent transaction."""
     if token['owner'] == txn['receiver']:
@@ -92,6 +95,9 @@ def valid_token(txn: Transaction, token: Token) -> bool:
 
 def valid_txn(tokens: List[Token], txn: Transaction) -> bool:
     """Validate transaction signatures."""
+    # coinbase transaction backdoor
+    if not tokens and txn['sender'] == COINBASE: return True
+
     owners = [token['owner'] for token in tokens]
 
     if not owners or len(set(owners)) > 1:
