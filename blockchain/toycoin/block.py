@@ -37,7 +37,7 @@ BlockChain = List[Block]
 
 
 GENESIS = hash.hash(b'genesis') # genesis block previous hash
-BLOCK_TXNS = 10 # magic number: max transactions per block
+BLOCK_MAX_TXNS = 10 # magic number: max transactions per block
 
 
 def gen_block(previous_hash: hash.Hash,
@@ -50,7 +50,7 @@ def gen_block(previous_hash: hash.Hash,
     if not txns:
         return None, []
 
-    txns_, rest = txns[:BLOCK_TXNS], txns[BLOCK_TXNS:]
+    txns_, rest = txns[:BLOCK_MAX_TXNS], txns[BLOCK_MAX_TXNS:]
 
     tree = gen_merkle(txns_)
     header = proof_of_work(previous_hash, tree.label, difficulty)
