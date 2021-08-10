@@ -14,7 +14,7 @@ from toycoin.network.msg_protocol import read_msg, send_msg # type: ignore
 
 async def main(args):
     me = uuid.uuid4().hex[:8]
-    print(f'Starting up {me}')
+    print(f'Starting up {me}: Listener')
     reader, writer = await asyncio.open_connection(args.host, args.port)
     print(f'I am {writer.get_extra_info("sockname")}')
     print(f'Listening on channel {args.listen}')
