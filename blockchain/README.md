@@ -22,7 +22,7 @@ Not tested with Python versions < 3.9.1
 
 There is no build per se, since this is a pure Python project, but the all.do script at the root collects a number of commands that are run to validate the code (`py.test`, `pyflakes`, `mypy` etc).
 
-The script can be run conveniently with `refo all` on the command line if [redo](https://redo.readthedocs.io/en/latest/) is installed, though the script contents can also be run individually / independently (e.g. as `sh all.do`).
+The script can be run conveniently with `redo all` on the command line if [redo](https://redo.readthedocs.io/en/latest/) is installed, though the script contents can also be run individually / independently (e.g. as `sh all.do`).
 
 ## Notes
 
