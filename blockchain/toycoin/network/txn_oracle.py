@@ -74,7 +74,7 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
              'receiver': a_wallet.public_key,
              'receiver_value': 100,
              'receiver_signature': b'',
-             'sender': b'genesis',
+             'sender': transaction.COINBASE,
              'sender_change': 0,
              'sender_signature': b''
              }
@@ -83,7 +83,7 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
              'receiver': b_wallet.public_key,
              'receiver_value': 50,
              'receiver_signature': b'',
-             'sender': b'genesis',
+             'sender': transaction.COINBASE,
              'sender_change': 0,
              'sender_signature': b''
              }
@@ -92,7 +92,7 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
              'receiver': c_wallet.public_key,
              'receiver_value': 25,
              'receiver_signature': b'',
-             'sender': b'genesis',
+             'sender': transaction.COINBASE,
              'sender_change': 0,
              'sender_signature': b''
              }
@@ -101,7 +101,7 @@ def init_state() -> Tuple[List[transaction.TxnPair], OracleState]:
              'receiver': d_wallet.public_key,
              'receiver_value': 10,
              'receiver_signature': b'',
-             'sender': b'genesis',
+             'sender': transaction.COINBASE,
              'sender_change': 0,
              'sender_signature': b''
              }

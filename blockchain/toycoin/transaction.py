@@ -76,7 +76,7 @@ def send(receiver_pub: bytes,
 # Validation
 
 
-COINBASE = b'COINBASE'
+COINBASE = hash.hash(b'COINBASE')
 
 
 def valid_token(txn: Transaction, token: Token) -> bool:

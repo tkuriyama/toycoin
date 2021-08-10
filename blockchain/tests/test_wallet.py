@@ -19,7 +19,7 @@ class TestWallet:
                  'receiver': a_wallet.public_key,
                  'receiver_value': 100,
                  'receiver_signature': b'',
-                 'sender': b'COINBASE',
+                 'sender': transaction.COINBASE,
                  'sender_change': 0,
                  'sender_signature': b''
                  }
@@ -27,7 +27,7 @@ class TestWallet:
                  'receiver': a_wallet.public_key,
                  'receiver_value': 50,
                  'receiver_signature': b'',
-                 'sender': b'COINBASE',
+                 'sender': transaction.COINBASE,
                  'sender_change': 0,
                  'sender_signature': b''
                  }
