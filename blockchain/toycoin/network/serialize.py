@@ -103,7 +103,6 @@ def pack_blockchain(blocks: block.Blockchain,
 def _pack_block(block: block.Block,
                abbrev: bool = False,
                pretty: bool = False,
-               skip_pack: bool = True
                ) -> str:
     """Pack blockchain to JSON string with b64 for bytes."""
     f = get_b2s(abbrev)
@@ -115,7 +114,22 @@ def _pack_block(block: block.Block,
             'this_hash': f(hdr['this_hash'])
             }
     txns_ = [pack_txn(txn) for txn in txns]
-    return json.dumps({'header': hdr_, 'txns': txns_})
+    return json_dumps({'header': hdr_, 'txns': txns_}, pretty)
+
+
+def pack_block_header(hdr: block.BlockHeader,
+                      abbrev: bool = False,
+                      pretty: bool = False,
+                      ) -> str:
+    """Pack blockchain to JSON string with b64 for bytes."""
+    f = get_b2s(abbrev)
+    hdr_ = {'timestamp': f(hdr['timestamp']),
+            'previous_hash': f(hdr['previous_hash']),
+            'nonce': f(hdr['nonce']),
+        'merkle_root': f(hdr['merkle_root']),
+            'this_hash': f(hdr['this_hash'])
+            }
+    return json_dumps(hdr_, pretty)
 
 
 def unpack_blockchain(s: str) -> block.Blockchain:

@@ -1,4 +1,5 @@
 """Toycoin node.
+
 """
 
 
@@ -8,7 +9,7 @@ import argparse, uuid # type: ignore
 from toycoin import block, transaction # type: ignore
 from toycoin.network import serialize, show # type: ignore
 from toycoin.network.msg_protocol import read_msg, send_msg # type: ignore
-from typing import List, Set # type: ignore
+from typing import List, Optional, Tuple # type: ignore
 
 
 ################################################################################
@@ -30,12 +31,12 @@ async def main(args):
     reader, writer = await asyncio.open_connection(args.host, args.port)
     print(f'I am {writer.get_extra_info("sockname")}')
 
-    txn_queue = Queue()
-    asyncio.create_task(block_worker(txn_queue, writer))
-
     channel = args.channel
     print(f'Node on channel {channel}')
     await send_msg(writer, channel.encode())
+
+    txn_queue = Queue()
+    asyncio.create_task(block_worker(txn_queue, writer, channel))
 
     try:
         while data := await read_msg(reader):
@@ -82,65 +83,94 @@ def handle_blocks(blocks: block.Blockchain):
     """
     global BLOCKCHAIN
     if len(blocks) > len(BLOCKCHAIN) and block.valid_blockchain(blocks):
+        print('Received longer, valid blockchain.')
         BLOCKCHAIN = blocks
+    else:
+        print('Received blockchain but it is not longer, or invalid.')
 
 
 ################################################################################
 # Block Generation
 
 
-async def block_worker(txn_queue: Queue, writer: asyncio.StreamWriter):
+async def block_worker(txn_queue: Queue,
+                       writer: asyncio.StreamWriter,
+                       channel: str):
     """Queue manager for generating blocks."""
-    global BLOCKCHAIN
-
-    token_set : Set[transaction.Token] = set()
-    txns : List[transaction.Transaction] = []
+    txn_pairs : List[transaction.TxnPair] = []
 
     while True:
-        tokens, txn = await txn_queue.get()
-        if valid_tokens(txn, tokens, token_set):
-            token_set = token_set | tokens
-            txns.append(txn)
+        txn_pair = await txn_queue.get()
+        if valid_tokens(txn_pair, txn_pairs):
+            txn_pairs.append(txn_pair)
 
-        if len(txns) >= 3:
-            block, txns_ = await asyncio.to_thread(gen_block, txns)
-            if block and block.valid_blockchain(BLOCKCHAIN + [block]):
-                BLOCKCHAIN.append(block)
-                await send_msg(writer, b'BLOC')
-                await send_msg(writer, serialize.pack_blockchain(BLOCKCHAIN))
-                txns = txns_[:] if txns_ else []
+        if len(txn_pairs) >= 3:
+            # check if txns have been added to blockchain
+            b, txns = await asyncio.to_thread(gen_block,
+                                              [txn for _, txn in txn_pairs])
+            if b and block.valid_blockchain(BLOCKCHAIN + [b]):
+                await update_blockchain(b, writer, channel)
+                txn_pairs = update_txn_pairs(txn_pairs, txns)
             else:
                 # figure out what to do with txns
-                pass
+                print('Invalid blockchain')
 
 
-def valid_tokens(txn: transaction.Transaction,
-                 tokens: List[transaction.Token],
-                 token_set: Set[transaction.Token]):
-    """Verify that the tokens are valid for use in the txn."""
+def valid_tokens(txn_pair: transaction.TxnPair,
+                 txn_pairs: List[transaction.TxnPair]):
+    """Verify that tokens are valid and not double spent."""
+    tokens, txn = txn_pair
+    seen_tokens = [ts for ts, _ in txn_pairs]
     valid = True
 
-    if set(tokens) & token_set:
-        print(f'Some tokens already spent: {tokens}')
+    if not block.valid_tokens(tokens, BLOCKCHAIN):
+        print(f'Some tokens missing source txns: {show.show_tokens(tokens)}')
         valid = False
-    elif not block.valid_tokens(tokens, BLOCKCHAIN):
-            print(f'Some tokens don\'t have source txns: {tokens}')
-            valid = False
-
-    if not valid:
-        print('Some tokens are invalid, skpping txn: {txn}')
+    elif any([token in seen_tokens for token in tokens]):
+        print(f'Some tokens already used in other txns: {show.show_tokens(tokens)}')
+        valid = False
 
     return valid
 
 
-def gen_block(txns: List[transaction.Transaction]):
+def gen_block(txns: List[transaction.Transaction]
+              ) -> Tuple[Optional[block.Block], List[transaction.Transaction]]:
     """Try to generate a block."""
-    print('Hi from blocker')
+    print('Starting block gen...')
+    h = (block.GENESIS if len(BLOCKCHAIN) == 0 else
+         BLOCKCHAIN[-1]['header']['this_hash'])
 
-    ret = block.gen_block(b'genesis', txns, 1)
-    print('Loop finished')
+    b, txns_ = block.gen_block(h, txns, block.next_difficulty(len(BLOCKCHAIN)))
+    block
+    if b:
+        print(f'Finished block gen, hash {b["header"]["this_hash"]}')
+        print(f'Block has {len(b["txns"])} txns')
+    else:
+        print('Finished block gen but no block was generated.')
+        print('Started with {len(txns)}, {len(txns_)} are leftover.')
 
-    return ret
+    return b, txns_
+
+
+async def update_blockchain(b: block.Block,
+                            writer: asyncio.StreamWriter,
+                            channel: str):
+    """Update blockchain and send to network."""
+    global BLOCKCHAIN
+    BLOCKCHAIN.append(b)
+    msg = b'BLOC' + serialize.pack_blockchain(BLOCKCHAIN).encode()
+    await send_msg(writer, channel.encode())
+    await send_msg(writer, msg)
+    print('Sent updated blockchain')
+
+
+def update_txn_pairs(txn_pairs: List[transaction.TxnPair],
+                     txns: List[transaction.Transaction]
+                     ) -> List[transaction.TxnPair]:
+    """Filter for txn_pairs matching given txns."""
+    return [(tokens, txn) for tokens, txn in txn_pairs
+            if txn in txns]
+
 
 
 ################################################################################

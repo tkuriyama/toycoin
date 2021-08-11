@@ -152,6 +152,7 @@ def valid_timestamp(b1: Block, b0: Block) -> bool:
 
 def valid_tokens(tokens: List[transaction.Token], chain: Blockchain) -> bool:
     """Tokens are unique and all come from prior txns in the blockchain."""
+    # backdoor for coinbase tokens
     return (transaction.unique_tokens(tokens) and
             all(valid_token(token, chain) for token in tokens))
 
