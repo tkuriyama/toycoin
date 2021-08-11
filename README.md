@@ -1,10 +1,10 @@
 # toycoin
 
-Toy blockchain implementation with visualizations.
+Toy blockchain implementation: see the series of `toycoin` write-ups [here](https://tkuriyama.github.io/).
 
 **Purely for learning purposes -- do not assume it's secure or useful in real-world contexts.**
 
-See the series of `toycoin` write-ups [here](https://tkuriyama.github.io/).
+
 
 ## blockchain
 
@@ -13,5 +13,9 @@ Python blockchain implementation. See [subdirectory](https://github.com/tkuriyam
 ## demo
 
 
+
+
 ## viz
+
+Data visualization planned, not yet implemented.
 
