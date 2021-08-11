@@ -105,7 +105,7 @@ async def block_worker(txn_queue: Queue,
         if valid_tokens(txn_pair, txn_pairs):
             txn_pairs.append(txn_pair)
 
-        if len(txn_pairs) >= 3:
+        if len(txn_pairs) >= 2:
             txns = [txn for _, txn in txn_pairs]
             b, txns_ = await asyncio.to_thread(gen_block, txns)
             await asyncio.sleep(delay) # slow some nodes down artificially
