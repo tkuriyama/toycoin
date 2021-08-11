@@ -8,7 +8,7 @@ import argparse, uuid # type: ignore
 from toycoin import block, transaction # type: ignore
 from toycoin.network import serialize, show # type: ignore
 from toycoin.network.msg_protocol import read_msg, send_msg # type: ignore
-from typing import List # type: ignore
+from typing import List, Set # type: ignore
 
 
 ################################################################################
@@ -16,7 +16,7 @@ from typing import List # type: ignore
 
 Address = bytes
 
-BLOCKCHAIN : block.BlockChain = []
+BLOCKCHAIN : block.Blockchain = []
 
 
 ################################################################################
@@ -76,10 +76,11 @@ def handle_txn(txn_pair: transaction.TxnPair, txn_queue: Queue):
     txn_queue.put_nowait(txn_pair)
 
 
-def handle_blocks(blocks: block.BlockChain):
+def handle_blocks(blocks: block.Blockchain):
     """Handle blocks.
     Update node blockchain if blocks are valid and form a longer chain.
     """
+    global BLOCKCHAIN
     if len(blocks) > len(BLOCKCHAIN) and block.valid_blockchain(blocks):
         BLOCKCHAIN = blocks
 
@@ -89,19 +90,47 @@ def handle_blocks(blocks: block.BlockChain):
 
 
 async def block_worker(txn_queue: Queue, writer: asyncio.StreamWriter):
-    txns = []
+    """Queue manager for generating blocks."""
+    global BLOCKCHAIN
+
+    token_set : Set[transaction.Token] = set()
+    txns : List[transaction.Transaction] = []
+
     while True:
-        txn = await txn_queue.get()
-        txns.append(txn)
+        tokens, txn = await txn_queue.get()
+        if valid_tokens(txn, tokens, token_set):
+            token_set = token_set | tokens
+            txns.append(txn)
+
         if len(txns) >= 3:
             block, txns_ = await asyncio.to_thread(gen_block, txns)
-            if block:
-                if block.valid_next_block(BLOCKCHAIN, block):
-                    BLOCKCHAIN.append(block)
-                    await send_msg(writer, b'BLOC')
-                    await send_msg(writer, serialize.pack_blockchain(BLOCKCHAIN))
-            # add leftover txns back to local list
-            txns = txns_[:] if txns_ else []
+            if block and block.valid_blockchain(BLOCKCHAIN + [block]):
+                BLOCKCHAIN.append(block)
+                await send_msg(writer, b'BLOC')
+                await send_msg(writer, serialize.pack_blockchain(BLOCKCHAIN))
+                txns = txns_[:] if txns_ else []
+            else:
+                # figure out what to do with txns
+                pass
+
+
+def valid_tokens(txn: transaction.Transaction,
+                 tokens: List[transaction.Token],
+                 token_set: Set[transaction.Token]):
+    """Verify that the tokens are valid for use in the txn."""
+    valid = True
+
+    if set(tokens) & token_set:
+        print(f'Some tokens already spent: {tokens}')
+        valid = False
+    elif not block.valid_tokens(tokens, BLOCKCHAIN):
+            print(f'Some tokens don\'t have source txns: {tokens}')
+            valid = False
+
+    if not valid:
+        print('Some tokens are invalid, skpping txn: {txn}')
+
+    return valid
 
 
 def gen_block(txns: List[transaction.Transaction]):
