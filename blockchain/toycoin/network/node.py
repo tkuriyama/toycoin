@@ -36,7 +36,7 @@ async def main(args):
     await send_msg(writer, channel.encode())
 
     txn_queue = Queue()
-    asyncio.create_task(block_worker(txn_queue, writer, channel))
+    asyncio.create_task(block_worker(txn_queue, writer, channel, args.delay))
 
     try:
         while data := await read_msg(reader):
@@ -95,7 +95,8 @@ def handle_blocks(blocks: block.Blockchain):
 
 async def block_worker(txn_queue: Queue,
                        writer: asyncio.StreamWriter,
-                       channel: str):
+                       channel: str,
+                       delay: int):
     """Queue manager for generating blocks."""
     txn_pairs : List[transaction.TxnPair] = []
 
@@ -105,15 +106,17 @@ async def block_worker(txn_queue: Queue,
             txn_pairs.append(txn_pair)
 
         if len(txn_pairs) >= 3:
-            # check if txns have been added to blockchain
-            b, txns = await asyncio.to_thread(gen_block,
-                                              [txn for _, txn in txn_pairs])
+            txns = [txn for _, txn in txn_pairs]
+            b, txns_ = await asyncio.to_thread(gen_block, txns)
+            await asyncio.sleep(delay) # slow some nodes down artificially
+
             if b and block.valid_blockchain(BLOCKCHAIN + [b]):
                 await update_blockchain(b, writer, channel)
-                txn_pairs = update_txn_pairs(txn_pairs, txns)
+                txn_pairs = update_txn_pairs(txn_pairs, txns_)
             else:
-                # figure out what to do with txns
-                print('Invalid blockchain')
+                print('Invalid block or blockchain')
+                print(f'Dropping txns:\n{show.show_txn_hashes(txns)}\n')
+                txn_pairs = []
 
 
 def valid_tokens(txn_pair: transaction.TxnPair,
@@ -181,6 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--host', default='localhost')
     parser.add_argument('--port', default=25000)
     parser.add_argument('--channel', default='/topic/main')
+    parser.add_argument('--delay', default=0, type=int)
 
     try:
         asyncio.run(main(parser.parse_args()))
