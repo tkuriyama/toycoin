@@ -115,7 +115,9 @@ def valid_blockchain(chain: Blockchain) -> bool:
 
     v3 = chain[0]['header']['previous_hash'] == GENESIS
 
-    return v1 and v2 and v3
+    v4 = all(valid_timestamp(b1, b0) for b1, b0 in pairs)
+
+    return v1 and v2 and v3 and v4
 
 
 def valid_block(block: Block, difficulty: int) -> bool:
@@ -138,6 +140,11 @@ def valid_header(header: BlockHeader, difficulty: int) -> bool:
 def valid_hash_pair(b1: Block, b0: Block) -> bool:
     """B1 previous hash matches B0 hash."""
     return b1['header']['previous_hash'] == b0['header']['this_hash']
+
+
+def valid_timestamp(b1: Block, b0: Block) -> bool:
+    """B1 has later timestmap than B0."""
+    return b1['header']['timestamp'] > b0['header']['timestamp']
 
 
 # Token & Blockchain Validation
