@@ -29,7 +29,7 @@ class Block(TypedDict):
     txns: Transactions
 
 
-BlockChain = List[Block]
+Blockchain = List[Block]
 
 
 ################################################################################
@@ -102,10 +102,10 @@ def solved(h: hash.Hash, n: int) -> bool:
 
 
 ################################################################################
-# Validation
+# Block Validation
 
 
-def valid_blockchain(chain: BlockChain) -> bool:
+def valid_blockchain(chain: Blockchain) -> bool:
     """Check validity of blockchain."""
     pairs = zip(chain[1:], chain)
     v1 = all(valid_hash_pair(b1, b0) for b1, b0 in pairs)
@@ -138,3 +138,23 @@ def valid_header(header: BlockHeader, difficulty: int) -> bool:
 def valid_hash_pair(b1: Block, b0: Block) -> bool:
     """B1 previous hash matches B0 hash."""
     return b1['header']['previous_hash'] == b0['header']['this_hash']
+
+
+# Token & Blockchain Validation
+
+
+def valid_tokens(tokens: List[transaction.Token], chain: Blockchain) -> bool:
+    """Tokens are unique and all come from prior txns in the blockchain."""
+    return (transaction.unique_tokens(tokens) and
+            all(valid_token(token, chain) for token in tokens))
+
+
+def valid_token(token: transaction.Token, chain: Blockchain):
+    """Search blockchain backwards for txn source of token."""
+    for block in chain[::-1]:
+        txns = block['txns']
+        for txn in txns:
+            if transaction.valid_token(txn, token):
+                return True
+
+    return False

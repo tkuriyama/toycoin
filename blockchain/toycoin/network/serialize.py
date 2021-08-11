@@ -91,7 +91,7 @@ def unpack_txn_pair(s: str) -> TxnPair:
 # Blocks
 
 
-def pack_blockchain(blocks: block.BlockChain,
+def pack_blockchain(blocks: block.Blockchain,
                     abbrev: bool = False,
                     pretty: bool = False) -> str:
     """Pack blockchain to JSON string with b64 for bytes."""
@@ -118,7 +118,7 @@ def _pack_block(block: block.Block,
     return json.dumps({'header': hdr_, 'txns': txns_})
 
 
-def unpack_blockchain(s: str) -> block.BlockChain:
+def unpack_blockchain(s: str) -> block.Blockchain:
     """Unapck blockchain from JSON string with b64 for bytes."""
     blocks = json.loads(s)
     return [_unpack_block(block) for block in blocks]

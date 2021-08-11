@@ -135,3 +135,15 @@ def hash_txn(txn: Transaction) -> hash.Hash:
                      utils.int_to_bytes(txn['sender_change']) +
                      txn['sender_signature'])
 
+
+def unique_tokens(tokens: List[Token]) -> bool:
+    """Check if list of tokens are all unique."""
+    return len(tokens) == len(set(token_to_tuple(token) for token in tokens))
+
+
+def token_to_tuple(token: Token) -> tuple:
+    """Convert token to tuple."""
+    return (token['txn_hash'],
+            token['owner'],
+            token['value'],
+            token['signature'])

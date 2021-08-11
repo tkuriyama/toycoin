@@ -1,4 +1,3 @@
-
 from toycoin import block, hash, signature, transaction, utils, wallet # type: ignore
 
 
@@ -57,14 +56,18 @@ class TestGenBlock:
 
         # some more transactions and next blocks
 
-        _, txn1 = a_wallet.send(10, b_wallet.public_key)
-        _, txn2 = a_wallet.send(10, c_wallet.public_key)
+        tokens1, txn1 = a_wallet.send(10, b_wallet.public_key)
+        tokens2, txn2 = a_wallet.send(10, c_wallet.public_key)
+
         txn3_fail = a_wallet.send(10, d_wallet.public_key)
         assert txn3_fail is None # cannot send tokens we don't have
 
         b1, _ = block.gen_block(b0['header']['this_hash'],
                                 [txn1, txn2],
                                 block.next_difficulty(1))
+
+        assert block.valid_tokens(tokens1, [b0, b1])
+        assert block.valid_tokens(tokens2, [b0, b1])
 
         a_wallet.confirm_send(transaction.hash_txn(txn1))
         a_wallet.confirm_send(transaction.hash_txn(txn2))
